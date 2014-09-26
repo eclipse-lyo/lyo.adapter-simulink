@@ -71,7 +71,7 @@ import simulink.WorkingDirectory;
  */
 public class SimulinkManager {
 
-	static String simulinkWorkingDirectoryPath = "C:/Users/Axel/git/oslc4jmagicdraw/oslc4jmagicdraw/Magicdraw Models/";
+	
 
 	static int sessionID = 1;
 

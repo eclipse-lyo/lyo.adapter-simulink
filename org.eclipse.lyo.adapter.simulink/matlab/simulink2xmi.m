@@ -87,7 +87,8 @@ for i = 1 : length(blockDiagrams_cell)
             blockParent = get(blockhandle, 'Parent');
             
             % print block name
-            blockName = get(blockhandle,'Name');                
+            blockNameOriginal = get(blockhandle,'Name'); 
+            blockName = regexprep(blockNameOriginal,'/','//');   % If the block name includes a slash character (/), you repeat the slash when you specify the block name in order to avoid later "Invalid Simulink object name" error
             fprintf(simulinkXMIFile, util.getBlockID(blockhandle));
             fprintf(simulinkXMIFile, '%s', '" type="');
           
@@ -129,40 +130,51 @@ for i = 1 : length(blockDiagrams_cell)
 %             end
 
             % code to consider all block parameters
-            block_parameters = get_param(blockKey,'DialogParameters');
-            block_parameter_names = fieldnames(block_parameters);
-            for m = 1 : length(block_parameter_names)
-                block_parameter_name = block_parameter_names{m};   % {} returns string from cell array, () returns cell                
-                block_parameter_value = get_param(blockhandle,block_parameter_name);
-                if(~ischar(block_parameter_value))
-                    if(~iscell(block_parameter_value))
-                        continue;
-                    end
-                    newblockparvalue = '[';
-                    for x = 1 : length(block_parameter_value)
-                        value_segment = block_parameter_value{x};
-                        if(~ischar(value_segment))
-                           value_segment = value_segment{1};                         
+            block_parameters = get_param(blockKey,'DialogParameters');           
+            if ~(isempty(block_parameters) | isa(block_parameters, 'double'))               
+            	block_parameter_names = fieldnames(block_parameters);
+                for m = 1 : length(block_parameter_names)
+                    block_parameter_name = block_parameter_names{m};   % {} returns string from cell array, () returns cell                
+                    block_parameter_value = get_param(blockhandle,block_parameter_name);
+                    if(~ischar(block_parameter_value))
+                        if(~iscell(block_parameter_value))
+                            continue;
                         end
-                        value_segment = strrep(value_segment,',','');
-                        if(x == 1)
-                            newblockparvalue = strcat(newblockparvalue, value_segment);
-                        else
-                            newblockparvalue = strcat(newblockparvalue, ', ', value_segment);    
-                        end  
+                        newblockparvalue = '[';
+                        for x = 1 : length(block_parameter_value)
+                            value_segment = block_parameter_value{x};
+                            if(~ischar(value_segment))
+                               value_segment = value_segment{1};                         
+                            end
+                            value_segment = strrep(value_segment,',','');
+                            if(x == 1)
+                                newblockparvalue = strcat(newblockparvalue, value_segment);
+                            else
+                                newblockparvalue = strcat(newblockparvalue, ', ', value_segment);    
+                            end  
+                        end
+                        newblockparvalue = strcat(newblockparvalue, ']');
+                        block_parameter_value = newblockparvalue;
                     end
-                    newblockparvalue = strcat(newblockparvalue, ']');
-                    block_parameter_value = newblockparvalue;
+                    fprintf(simulinkXMIFile, '\t\t\t');
+                    fprintf(simulinkXMIFile, '%s', '<parameter name="');
+                    blockParQualifiedName = strcat(util.getBlockID(blockhandle),'/',block_parameter_name);
+                    fprintf(simulinkXMIFile, blockParQualifiedName);
+                    fprintf(simulinkXMIFile, '%s', '" value="');
+%                     fprintf(simulinkXMIFile, block_parameter_value);
+                    if(strcmp(block_parameter_value,'<'))
+                        fprintf(simulinkXMIFile, '%s', '&lt;');
+                    elseif(strcmp(block_parameter_value,'>'))
+                        fprintf(simulinkXMIFile, '%s', '&gt;');
+                    else
+                        fprintf(simulinkXMIFile, block_parameter_value);
+                    end
+                    fprintf(simulinkXMIFile, '%s', '"/>');
+                    fprintf(simulinkXMIFile, '\n'); 
                 end
-                fprintf(simulinkXMIFile, '\t\t\t');
-                fprintf(simulinkXMIFile, '%s', '<parameter name="');
-                blockParQualifiedName = strcat(util.getBlockID(blockhandle),'/',block_parameter_name);
-                fprintf(simulinkXMIFile, blockParQualifiedName);
-                fprintf(simulinkXMIFile, '%s', '" value="');
-                fprintf(simulinkXMIFile, block_parameter_value);
-                fprintf(simulinkXMIFile, '%s', '"/>');
-                fprintf(simulinkXMIFile, '\n'); 
+
             end
+            
             
             %******************
             % print input ports 
@@ -175,7 +187,9 @@ for i = 1 : length(blockDiagrams_cell)
                     fprintf(simulinkXMIFile, '%s', '<inputPort xmi:id="');                    
                     inputPortID = util.getPortID(inputPortHandle, blockhandle, 'inport', k);
                     % IDs in XMI cannot contain white-space characters
-                    new_inputPortID = strrep(inputPortID, ' ', '_');
+                    new_inputPortID2 = strrep(inputPortID, ' ', '_');
+                    % IDs in XMI cannot contain newline characters
+            		new_inputPortID = strrep(new_inputPortID2,sprintf('\n'),'_');
                     fprintf(simulinkXMIFile, new_inputPortID);
                     fprintf(simulinkXMIFile, '%s', '" id="');
                     fprintf(simulinkXMIFile, new_inputPortID);
@@ -194,7 +208,9 @@ for i = 1 : length(blockDiagrams_cell)
                     fprintf(simulinkXMIFile, '%s', '<outputPort xmi:id="');                    
                     outputPortID = util.getPortID(outputPortHandle, blockhandle, 'outport', k);
                     % IDs in XMI cannot contain white-space characters
-                    new_outputPortID = strrep(outputPortID, ' ', '_');
+                    new_outputPortID2 = strrep(outputPortID, ' ', '_');
+                    % IDs in XMI cannot contain newline characters
+            		new_outputPortID = strrep(new_outputPortID2,sprintf('\n'),'_');
                     fprintf(simulinkXMIFile, new_outputPortID);
                     fprintf(simulinkXMIFile, '%s', '" id="');
                     fprintf(simulinkXMIFile, new_outputPortID);
@@ -223,7 +239,9 @@ for i = 1 : length(blockDiagrams_cell)
             fprintf(simulinkXMIFile, '%s', '<line sourcePort="');        
             srcPortID = util.getPortID(srcPortHandle, srcBlockHandle, 'outport'); 
             % IDs in XMI cannot contain white-space characters
-            new_srcPortID = strrep(srcPortID, ' ', '_');
+            new_srcPortID2 = strrep(srcPortID, ' ', '_');
+            % IDs in XMI cannot contain newline characters
+            new_srcPortID = strrep(new_srcPortID2,sprintf('\n'),'_');
             fprintf(simulinkXMIFile, '%s', new_srcPortID);
             for n = 1 : length(dstBlockHandle)
                 if(n == 1)
@@ -233,7 +251,9 @@ for i = 1 : length(blockDiagrams_cell)
                 end              
                 dstPortID = util.getPortID(dstPortHandle, dstBlockHandle, 'inport', n);
                 % IDs in XMI cannot contain white-space characters
-                new_dstPortID = strrep(dstPortID, ' ', '_');
+                new_dstPortID2 = strrep(dstPortID, ' ', '_');
+                % IDs in XMI cannot contain newline characters
+            	new_dstPortID = strrep(new_dstPortID2,sprintf('\n'),'_');
                 fprintf(simulinkXMIFile, '%s', new_dstPortID);
             end
             fprintf(simulinkXMIFile, '%s', '"/>');
