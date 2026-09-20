@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
+import edu.gatech.mbsec.adapter.simulink.application.MatlabCommand;
 
 
 /**
@@ -48,11 +49,9 @@ public class Simulink2XMIThread2 extends Thread {
 			String matlabFolder = new File(OSLC4JSimulinkApplication.matlabScriptsDirectory)
 					.getAbsolutePath().replace('\\', '/');
 			String modelsFolder = simulinkModelsFolder == null ? "" : simulinkModelsFolder.replace('\\', '/');
-			Process process = Runtime
-					.getRuntime()
-					.exec("matlab start /wait "
-							+ "-nodisplay -nosplash -nodesktop -r " +
-							"addpath('" + matlabFolder + "');simulink2xmi('" + modelsFolder + "');exit;");
+			Process process = MatlabCommand.start("addpath("
+					+ MatlabCommand.stringLiteral(matlabFolder) + ");simulink2xmi("
+					+ MatlabCommand.stringLiteral(modelsFolder) + ");exit;");
 			process.waitFor();									
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;

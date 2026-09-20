@@ -664,9 +664,10 @@ public class SimulinkManager {
 
 		Process addBlockProcess;
 		try {
-			addBlockProcess = Runtime.getRuntime()
-					.exec("matlab start /wait " + "-nodisplay -nosplash -nodesktop -r " + "addSimulinkBlock('"
-							+ modelName + "','" + simulinkBlockType + "','" + simulinkBlockQualifiedName + "');");
+			addBlockProcess = MatlabCommand.start("addSimulinkBlock("
+					+ MatlabCommand.stringLiteral(modelName) + ","
+					+ MatlabCommand.stringLiteral(simulinkBlockType) + ","
+					+ MatlabCommand.stringLiteral(simulinkBlockQualifiedName) + ");");
 			int exitValue = addBlockProcess.waitFor();
 			if (exitValue == 0) {
 				LOG.info("added {} Block to model {}", simulinkBlock.getName(), modelName);
@@ -691,10 +692,11 @@ public class SimulinkManager {
 
 		Process setParamProcess;
 		try {
-			setParamProcess = Runtime.getRuntime()
-					.exec("matlab start /wait " + "-nodisplay -nosplash -nodesktop -r " + "addSimulinkParameter('"
-							+ modelName + "','" + simulinkParameterOwner + "','" + simulinkParameter.getName() + "','"
-							+ simulinkParameter.getValue() + "');");
+			setParamProcess = MatlabCommand.start("addSimulinkParameter("
+					+ MatlabCommand.stringLiteral(modelName) + ","
+					+ MatlabCommand.stringLiteral(simulinkParameterOwner) + ","
+					+ MatlabCommand.stringLiteral(simulinkParameter.getName()) + ","
+					+ MatlabCommand.stringLiteral(simulinkParameter.getValue()) + ");");
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
 					LOG.info("set {} Parameter to value {}", simulinkParameter.getName(), simulinkParameter.getValue());
@@ -750,7 +752,10 @@ public class SimulinkManager {
 		// matlabCommand.append("save_system('" + modelName +
 		// "');close_system;exit;");
 
-		StringBuffer matlabCommand = new StringBuffer("matlab start /wait " + "-nodisplay -nosplash -nodesktop -r ");
+		StringBuffer matlabCommand = new StringBuffer("addSimulinkLine(")
+				.append(MatlabCommand.stringLiteral(modelName)).append(",")
+				.append(MatlabCommand.stringLiteral(modelName + "/" + SubsystemOwningLine)).append(",")
+				.append(MatlabCommand.stringLiteral(simulinkLineSourcePortName)).append(",");
 		StringBuffer targetPorts = new StringBuffer("{");
 		int i = 0;
 		for (Link targetPortLink : simulinkLine.getTargetPorts()) {
@@ -766,18 +771,16 @@ public class SimulinkManager {
 			if (i > 0) {
 				targetPorts.append(",");
 			}
-			targetPorts.append("'" + simulinkLineTargetPortName + "'");
+			targetPorts.append(MatlabCommand.stringLiteral(simulinkLineTargetPortName));
 			i++;
 		}
 		targetPorts.append("}");
-		matlabCommand.append("addSimulinkLine('" + modelName + "','" + modelName + "/" + SubsystemOwningLine + "','"
-				+ simulinkLineSourcePortName + "'," + targetPorts.toString() + ");");
-		String matlabCommandString = matlabCommand.toString();
+		matlabCommand.append(targetPorts).append(");");
 
 		// add_line(modelName,'Step/1','Subsystem1/1', 'autorouting','on');
 		Process setParamProcess;
 		try {
-			setParamProcess = Runtime.getRuntime().exec(matlabCommandString);
+			setParamProcess = MatlabCommand.start(matlabCommand.toString());
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
 				LOG.info("added {}", simulinkLine.getAbout());
@@ -794,8 +797,8 @@ public class SimulinkManager {
 	}
 
 	public static void createSimulinkElements(SimulinkElementsToCreate newElements, String modelName) {
-		StringBuffer matlabCommand = new StringBuffer(
-				"matlab start /wait " + "-nodisplay -nosplash -nodesktop -r openSimulinkModel3('" + modelName + "');");
+		StringBuffer matlabCommand = new StringBuffer("openSimulinkModel3(")
+				.append(MatlabCommand.stringLiteral(modelName)).append(");");
 
 		// shuffle blocks in the right order (nested blocks after regular
 		// blocks)
@@ -843,8 +846,10 @@ public class SimulinkManager {
 			URI simulinkBlockURI = simulinkBlock.getAbout();			
 			String simulinkBlockQualifiedName = getSimulinkElementQualifiedName(simulinkBlockURI.toString(), modelName, "block");							
 			String simulinkBlockType = simulinkBlock.getType();
-			matlabCommand.append("addSimulinkBlock3('" + modelName + "','" + simulinkBlockType + "','"
-					+ simulinkBlockQualifiedName + "');");
+			matlabCommand.append("addSimulinkBlock3(")
+					.append(MatlabCommand.stringLiteral(modelName)).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkBlockType)).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkBlockQualifiedName)).append(");");
 
 		}
 		// add all addSimulinkParameter commands
@@ -861,8 +866,11 @@ public class SimulinkManager {
 			}
 			
 			String simulinkParameterOwner = getQualifiedNameOfOwner(simulinkParameterQualifiedName);
-			matlabCommand.append("addSimulinkParameter3('" + modelName + "','" + simulinkParameterOwner + "','"
-					+ simulinkParameter.getName() + "','" + simulinkParameter.getValue() + "');");
+			matlabCommand.append("addSimulinkParameter3(")
+					.append(MatlabCommand.stringLiteral(modelName)).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkParameterOwner)).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkParameter.getName())).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkParameter.getValue())).append(");");
 		}
 
 		for (SimulinkLine simulinkLine : newElements.getLinesToCreate()) {
@@ -915,28 +923,32 @@ public class SimulinkManager {
 				if (i > 0) {
 					targetPorts.append(",");
 				}
-				targetPorts.append("'" + simulinkLineTargetPortName + "'");
+				targetPorts.append(MatlabCommand.stringLiteral(simulinkLineTargetPortName));
 				i++;
 			}
 			targetPorts.append("}");
-			matlabCommand.append("addSimulinkLine3('" + modelName + "','" + modelName + "/" + SubsystemOwningLine
-					+ "','" + simulinkLineSourcePortName + "'," + targetPorts.toString() + ");");
+			matlabCommand.append("addSimulinkLine3(")
+					.append(MatlabCommand.stringLiteral(modelName)).append(",")
+					.append(MatlabCommand.stringLiteral(modelName + "/" + SubsystemOwningLine)).append(",")
+					.append(MatlabCommand.stringLiteral(simulinkLineSourcePortName)).append(",")
+					.append(targetPorts).append(");");
 		}
 
 		// change directory to Simulink model directory
-		matlabCommand.append("cd('" + OSLC4JSimulinkApplication.simulinkModelsDirectory + "');");
+		matlabCommand.append("cd(")
+				.append(MatlabCommand.stringLiteral(OSLC4JSimulinkApplication.simulinkModelsDirectory)).append(");");
 		
 		// close and save model
-		matlabCommand.append("save_system('" + modelName + "');");
+		matlabCommand.append("save_system(")
+				.append(MatlabCommand.stringLiteral(modelName)).append(");");
 		matlabCommand.append("close_system;");
 
 		// close the Matlab command window
 		matlabCommand.append("exit;");
 
-		String matlabCommandString = matlabCommand.toString();
 		Process setParamProcess;
 		try {
-			setParamProcess = Runtime.getRuntime().exec(matlabCommandString);
+			setParamProcess = MatlabCommand.start(matlabCommand.toString());
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
 				LOG.info("added {}", newElements.getAbout());
