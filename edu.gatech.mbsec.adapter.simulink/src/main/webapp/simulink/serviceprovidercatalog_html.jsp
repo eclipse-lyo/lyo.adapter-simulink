@@ -26,8 +26,11 @@
 <%@ page import="org.eclipse.lyo.oslc4j.core.model.Link"%>
 <%@ page import="java.net.URI"%>
 <%
-
 ServiceProviderCatalog element = (ServiceProviderCatalog)request.getAttribute("catalog");
+if (element == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Service Provider Catalog not found");
+	return;
+}
 %>
 <html>
 <head>

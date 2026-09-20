@@ -63,7 +63,7 @@ public class SimulinkBlock extends AbstractResource{
 	@OslcDescription("Description of Block::name TBD")
 	@OslcName("name")
 	@OslcOccurs(Occurs.ZeroOrOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Block_name")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Block_name")
 	@OslcTitle("name")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getName() {
@@ -78,7 +78,7 @@ public class SimulinkBlock extends AbstractResource{
 	@OslcDescription("Description of Block::type TBD")
 	@OslcName("type")
 	@OslcOccurs(Occurs.ZeroOrOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Block_type")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Block_type")
 	@OslcTitle("type")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getType() {
@@ -98,7 +98,7 @@ public class SimulinkBlock extends AbstractResource{
 	@OslcDescription("Description of Block::inputPort TBD")
 	@OslcName("inputPort")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Block_inputPort")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Block_inputPort")
 	@OslcTitle("inputPort")
 	@OslcReadOnly(false)
 	public Link[]  getInputPorts() {
@@ -119,7 +119,7 @@ public class SimulinkBlock extends AbstractResource{
 	@OslcDescription("Description of Block::outputPort TBD")
 	@OslcName("outputPort")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Block_outputPort")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Block_outputPort")
 	@OslcTitle("outputPort")
 	@OslcReadOnly(false)
 	public Link[]  getOutputPorts() {
@@ -140,7 +140,7 @@ public class SimulinkBlock extends AbstractResource{
 	@OslcDescription("Description of Block::parameter TBD")
 	@OslcName("parameter")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Block_parameter")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Block_parameter")
 	@OslcTitle("parameter")
 	@OslcReadOnly(false)
 	public Link[]  getParameters() {

@@ -28,8 +28,11 @@
 <%@ page
 	import="edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock"%>
 <%
-
 SimulinkBlock block = (SimulinkBlock)request.getAttribute("block");
+if (block == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Simulink Block not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 %>
 <html>

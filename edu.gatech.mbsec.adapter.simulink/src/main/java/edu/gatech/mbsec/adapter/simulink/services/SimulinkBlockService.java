@@ -17,30 +17,33 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
@@ -71,6 +74,8 @@ import edu.gatech.mbsec.adapter.simulink.application.SimulinkManager;
 @OslcService(Constants.SIMULINK_BLOCK_DOMAIN)
 @Path("{modelName}/blocks")
 public class SimulinkBlockService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SimulinkBlockService.class);
 	
 	@Context
 	private HttpServletRequest httpServletRequest;
@@ -147,7 +152,7 @@ public class SimulinkBlockService {
 			try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			}
 		}
@@ -168,7 +173,7 @@ public class SimulinkBlockService {
 			try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			}
 		}
@@ -183,8 +188,8 @@ public class SimulinkBlockService {
 			OslcMediaType.APPLICATION_XML, OslcMediaType.APPLICATION_JSON })
 	public Response addBlock(@PathParam("modelName") final String modelName,
 			final SimulinkBlock simulinkBlock) throws IOException, ServletException {
-		System.out.println(simulinkBlock.getName());		
-		SimulinkManager.createSimulinkBlock(simulinkBlock, modelName);
+		LOG.info(simulinkBlock.getName());		
+		SimulinkManager.getBackend().createBlock(simulinkBlock, modelName);
 		URI about = simulinkBlock.getAbout();
 		return Response.created(about).entity(simulinkBlock).build();
 	}

@@ -28,8 +28,11 @@
 <%@ page
 	import="edu.gatech.mbsec.adapter.simulink.resources.SimulinkInputPort"%>
 <%
-
 SimulinkInputPort element = (SimulinkInputPort)request.getAttribute("element");
+if (element == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Simulink Input Port not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 %>
 <html>

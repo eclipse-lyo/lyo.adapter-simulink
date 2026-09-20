@@ -63,7 +63,7 @@ public class SimulinkOutputPort extends AbstractResource{
 	@OslcDescription("Description of Port::id TBD")
 	@OslcName("id")
 	@OslcOccurs(Occurs.ExactlyOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Port_id")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Port_id")
 	@OslcTitle("id")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getId() {

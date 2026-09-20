@@ -63,9 +63,9 @@ public class SimulinkLine extends AbstractResource{
 
 	@OslcDescription("Description of Line::sourcePort TBD")
 	@OslcName("sourcePort")
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Line/sourcePort")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Line/sourcePort")
 	@OslcTitle("sourcePort")
-	@OslcRange("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Port")
+	@OslcRange(Constants.SIMULINK_NAMESPACE + "Port")
 	public URI  getSourcePort() {
 		 return sourcePort;
 	}
@@ -84,7 +84,7 @@ public class SimulinkLine extends AbstractResource{
 	@OslcDescription("Description of Line::targetPort TBD")
 	@OslcName("targetPort")
 	@OslcOccurs(Occurs.OneOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Line_targetPort")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Line_targetPort")
 	@OslcTitle("targetPort")
 	@OslcReadOnly(false)
 	public Link[]  getTargetPorts() {

@@ -1,5 +1,8 @@
 package ecore2oslcspecification;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -36,12 +39,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
-
 public class OSLCSpecificationCreation {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OSLCSpecificationCreation.class);
 
 	static String specificEcoreFileLocation = "../org.eclipse.lyo.adapter.simulink.ecore/model/simulink4MBSE.ecore";
 	static String genericEcoreFileLocation = "../org.eclipse.mbse.common.vocabulary/Ecore Metamodels/CommonMBSEVocabulary.ecore";
@@ -64,7 +64,7 @@ public class OSLCSpecificationCreation {
 		convertEcoreMetamodelIntoRDFandOSLCResources();
 		closeRDFVocabularyFile();
 
-		System.out.println("Created " + metaClasses.size() + " OSLC Resource Shapes");
+		LOG.info("Created {} OSLC Resource Shapes", metaClasses.size());
 	}
 
 	private static void closeRDFVocabularyFile() {
@@ -75,8 +75,7 @@ public class OSLCSpecificationCreation {
 			rdfsClassFileWriter.append(rdfVocabularyBuffer);
 			rdfsClassFileWriter.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 	}
 
@@ -106,10 +105,10 @@ public class OSLCSpecificationCreation {
 
 	private static void mapConceptsToOSLCSpecification(String prefix, ArrayList<EClassifier> eClassifiers) {
 		for (EClassifier eClassifier : eClassifiers) {
-			System.out.println("\t\t" + eClassifier.getName());
+		LOG.info("\t\t{}", eClassifier.getName());
 
 			if (metaClasses.contains(eClassifier.getName())) {
-				System.err.println(eClassifier.getName() + " ALREADY DEFINED!");
+				LOG.error("{} ALREADY DEFINED!", eClassifier.getName());
 				continue;
 			} else {
 				metaClasses.add(eClassifier.getName());
@@ -143,8 +142,7 @@ public class OSLCSpecificationCreation {
 									rdfVocabularyBuffer.append("\r\n");
 								}
 							} catch (UnsupportedEncodingException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								LOG.error("Unhandled exception", e);
 							}
 							break;
 						}
@@ -251,8 +249,7 @@ public class OSLCSpecificationCreation {
 										rdfVocabularyBuffer.append("\r\n");
 									}
 								} catch (UnsupportedEncodingException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									LOG.error("Unhandled exception", e);
 								}
 								break;
 							}
@@ -299,12 +296,9 @@ public class OSLCSpecificationCreation {
 					rdfVocabularyBuffer.append("\t</rdf:Property>");
 					rdfVocabularyBuffer.append("\r\n");
 
-					// if (metaPropertyURIs.contains(propertyID)) {
-					// // System.err.println(propertyID + " ALREADY DEFINED!");
-					// continue;
-					// }else{
-					// metaPropertyURIs.add(propertyID);
-					// }
+					if (metaPropertyURIs.contains(propertyID)) {
+						LOG.warn("{} ALREADY DEFINED!", propertyID);
+					}
 
 					// oslc:property
 					resourceShapeBuffer.append("\r\n");
@@ -315,7 +309,7 @@ public class OSLCSpecificationCreation {
 					resourceShapeBuffer.append("\t\t\t<oslc:Property>");
 
 					// oslc:name
-					System.out.println("\t\t\t" + eStructuralFeature.getName());
+					LOG.info("\t\t\t{}", eStructuralFeature.getName());
 					resourceShapeBuffer.append("\r\n");
 					resourceShapeBuffer.append("\t\t\t\t<oslc:name>" + eStructuralFeature.getName() + "</oslc:name>");
 
@@ -325,7 +319,7 @@ public class OSLCSpecificationCreation {
 							+ ":" + propertyID + "\"/>");
 
 					// oslc:valueType or oslc:range
-					System.out.println("\t\t\t\t" + eStructuralFeature.getEType().getName());
+					LOG.info("\t\t\t\t{}", eStructuralFeature.getEType().getName());
 					if (eStructuralFeature instanceof EAttribute) {
 						if (eStructuralFeature.getEType().getName().equals("String")) {
 							resourceShapeBuffer.append("\r\n");
@@ -363,8 +357,8 @@ public class OSLCSpecificationCreation {
 					}
 
 					// oslc:occurs
-					System.out.println("\t\t\t\t" + eStructuralFeature.getLowerBound());
-					System.out.println("\t\t\t\t" + eStructuralFeature.getUpperBound());
+					LOG.info("\t\t\t\t{}", eStructuralFeature.getLowerBound());
+					LOG.info("\t\t\t\t{}", eStructuralFeature.getUpperBound());
 					resourceShapeBuffer.append("\r\n");
 					int lowerBound = eStructuralFeature.getLowerBound();
 					int upperBound = eStructuralFeature.getUpperBound();
@@ -432,8 +426,7 @@ public class OSLCSpecificationCreation {
 					resourceShapeFileWriter.append(resourceShapeBuffer);
 					resourceShapeFileWriter.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("Unhandled exception", e);
 				}
 			}
 		}
@@ -455,7 +448,7 @@ public class OSLCSpecificationCreation {
 		ArrayList<EClassifier> languageConceptsToMap = new ArrayList<EClassifier>();
 		languageConceptsToMap.addAll(ecorePackage.getEClassifiers());
 		for (EPackage nestedPackage : ecorePackage.getESubpackages()) {
-			System.out.println("\t" + nestedPackage.getName());
+			LOG.info("\t{}", nestedPackage.getName());
 			for (EClassifier eClassifier : nestedPackage.getEClassifiers()) {
 				languageConceptsToMap.add(eClassifier);
 			}
@@ -472,10 +465,10 @@ public class OSLCSpecificationCreation {
 
 		}
 		for (EReference eReference : metaClass.getEAllReferences()) {
-			// System.out.println("\t\t\t" + eReference.getName());
-			// if (eReference.getName().startsWith("base")) {
-			// System.out
-			// .println("\t\t\t\t" + eReference.getEType().getName());
+			LOG.debug("\t\t\t{}", eReference.getName());
+			if (eReference.getName().startsWith("base")) {
+				LOG.debug("\t\t\t\t{}", eReference.getEType().getName());
+			}
 			EClassifier umlClassifier = eReference.getEType();
 			if (umlClassifier instanceof EClass) {
 				EClass umlType = (EClass) umlClassifier;

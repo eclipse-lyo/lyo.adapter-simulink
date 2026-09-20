@@ -18,40 +18,39 @@
 package edu.gatech.mbsec.adapter.simulink.services;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
-import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkInputPort;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkLine;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkModel;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkOutputPort;
-import org.eclipse.lyo.oslc4j.core.OSLC4JUtils;
 import org.eclipse.lyo.oslc4j.core.annotation.OslcCreationFactory;
 import org.eclipse.lyo.oslc4j.core.annotation.OslcQueryCapability;
 import org.eclipse.lyo.oslc4j.core.annotation.OslcService;
@@ -77,17 +76,10 @@ public class RDFVocabularyService {
 
 	@GET
 	@Produces({ OslcMediaType.APPLICATION_RDF_XML, OslcMediaType.APPLICATION_JSON })
-	public void getRDFVocabulary()
+	public Response getRDFVocabulary()
 					throws OslcCoreApplicationException, URISyntaxException {
 
-			RequestDispatcher rd = httpServletRequest.getRequestDispatcher("/rdfvocabulary/simulinkRDFVocabulary.rdf");
-			try {
-				rd.forward(httpServletRequest, httpServletResponse);
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new WebApplicationException(e);
-			}
-		
+			return vocabularyResponse("application/rdf+xml");
 
 		// throw new WebApplicationException(Response.Status.NOT_FOUND);
 
@@ -95,18 +87,23 @@ public class RDFVocabularyService {
 
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	public void getHtmlRDFVocabulary() throws OslcCoreApplicationException, URISyntaxException {
-		String requestURL = httpServletRequest.getRequestURL().toString();
-		httpServletRequest.setAttribute("requestURL", requestURL);
-		RequestDispatcher rd = httpServletRequest.getRequestDispatcher("/rdfvocabulary/simulinkRDFVocabulary.jsp");
-		try {
-			rd.forward(httpServletRequest, httpServletResponse);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WebApplicationException(e);
-		}
+	public Response getHtmlRDFVocabulary() throws OslcCoreApplicationException, URISyntaxException {
+		return vocabularyResponse(MediaType.TEXT_HTML);
 
 		// throw new WebApplicationException(Response.Status.NOT_FOUND);
 
+	}
+
+	private Response vocabularyResponse(final String contentType) {
+		try (InputStream input = httpServletRequest.getServletContext()
+				.getResourceAsStream("/rdfvocabulary/simulinkRDFVocabulary.rdf")) {
+			if (input == null) {
+				throw new WebApplicationException("RDF vocabulary resource is missing");
+			}
+			final String vocabulary = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+			return Response.ok(vocabulary, contentType).build();
+		} catch (IOException exception) {
+			throw new WebApplicationException(exception);
+		}
 	}
 }

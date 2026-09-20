@@ -3,6 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
+		<artifactId>oslc4j-simulink-parent</artifactId>
+		<version>1.1.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
 	<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
 	<artifactId>oslc4jsimulink</artifactId>
 	<version>1.1.0</version>
@@ -12,88 +19,88 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
 	<dependencies>
+		<!-- Console-only logging for local runs and container stdout/stderr capture. -->
 		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>javax.servlet.jsp-api</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.17</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.26</version>
+		</dependency>
+
+		<!-- Servlet / JSP APIs (jakarta namespace, Jakarta EE 10) -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
-			<version>2.3.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-			<version>3.1-b06</version>
+			<groupId>jakarta.servlet.jsp.jstl</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
 		</dependency>
 
-
+		<!-- Internal sibling modules -->
 		<dependency>
 			<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
 			<artifactId>ecore-simulink</artifactId>
-			<version>1.1.0</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
 			<artifactId>oslc4j-simulink-resources</artifactId>
-			<version>1.1.0</version>
 		</dependency>
-
-
-
-
 		<dependency>
-			<groupId>org.eclipse.lyo.oslc4j.core</groupId>
-			<artifactId>oslc4j-wink</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
+			<artifactId>oslc4jsimulink-svn</artifactId>
 		</dependency>
+
+		<!-- Lyo 7 (jakarta) -->
 		<dependency>
 			<groupId>org.eclipse.lyo.oslc4j.core</groupId>
 			<artifactId>oslc4j-jena-provider</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.lyo.oslc4j.core</groupId>
 			<artifactId>oslc4j-core</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.lyo.core.query</groupId>
 			<artifactId>oslc-query</artifactId>
-			<version>[1.1,)</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eclipse.lyo.oslc4j.core</groupId>
 			<artifactId>oslc4j-json4j-provider</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+		<!-- OSLC client (non-deprecated; replaces the old oslc-java-client).
+		     Used by the standalone OSLCWebClient4* demo programs. -->
+		<dependency>
+			<groupId>org.eclipse.lyo.clients</groupId>
+			<artifactId>oslc-client</artifactId>
 		</dependency>
 
+		<!-- JAX-RS 3.0 runtime (Jersey, jakarta namespace) -->
 		<dependency>
-			<groupId>edu.gatech.mbsec.subversion.client</groupId>
-			<artifactId>svnkit-client</artifactId>
-			<version>1.1.0</version>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>edu.gatech.mbsec.adapter.subversion</groupId>
-			<artifactId>oslc4jsubversion</artifactId>
-			<version>1.1.0</version>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>jstl</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2</version>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
 		</dependency>
 
 		<dependency>
@@ -102,45 +109,165 @@
 			<version>3.4</version>
 		</dependency>
 
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>6.0.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.10.2</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
+		<finalName>oslc4jsimulink</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.13.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>17</source>
+					<target>17</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<!-- <version>2.0</version> -->
-				<!-- Axel: new version to avoid JSP compilation problem -->
-				<version>2.2</version>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-maven-plugin</artifactId>
+				<version>12.0.16</version>
 				<configuration>
-					<server>tomcat7</server>
-					<port>8181</port>
-					<url>http://localhost:8080/manager/text</url>
-					<path>/oslc4jsimulink</path>
-					<webResources>
-						<resource>
-							<!-- this is relative to the pom.xml directory -->
-							<directory>matlab</directory>
-						</resource>
-					</webResources>
-					<portNames>
-						<portName>maven.tomcat.port</portName>
-					</portNames>
+					<webApp>
+						<contextPath>/</contextPath>
+					</webApp>
+					<httpConnector>
+						<port>8080</port>
+					</httpConnector>
+					<scan>0</scan>
+					<stopPort>8091</stopPort>
+					<stopKey>STOP</stopKey>
 				</configuration>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals><goal>start</goal></goals>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals><goal>stop</goal></goals>
+					</execution>
+				</executions>
 			</plugin>
-
-
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>lyo-releases</id>
+			<name>Eclipse Lyo Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/lyo-releases/</url>
+		</repository>
+		<repository>
+			<id>lyo-snapshots</id>
+			<name>Eclipse Lyo Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/lyo-snapshots/</url>
+			<releases><enabled>false</enabled></releases>
+		</repository>
+	</repositories>
+
+	<profiles>
+		<profile>
+			<id>acceptance</id>
+			<dependencies>
+				<dependency>
+					<groupId>io.rest-assured</groupId>
+					<artifactId>rest-assured</artifactId>
+					<version>6.0.1</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter</artifactId>
+					<version>5.10.2</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<version>3.5.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>full</id>
+			<properties>
+				<simulink.backend>matlab</simulink.backend>
+				<subversion.client.impl>subversion</subversion.client.impl>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.tmatesoft.svnkit</groupId>
+					<artifactId>svnkit</artifactId>
+					<version>1.10.11</version>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<version>3.4.0</version>
+						<configuration>
+							<webResources>
+								<resource>
+									<directory>matlab</directory>
+									<targetPath>matlab</targetPath>
+								</resource>
+								<resource>
+									<directory>simulinkmodels</directory>
+									<targetPath>simulinkmodels</targetPath>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.jetty.ee10</groupId>
+						<artifactId>jetty-ee10-maven-plugin</artifactId>
+						<configuration>
+							<systemProperties>
+								<systemProperty>
+									<name>simulink.backend</name>
+									<value>matlab</value>
+								</systemProperty>
+								<systemProperty>
+									<name>subversion.client.impl</name>
+									<value>subversion</value>
+								</systemProperty>
+							</systemProperties>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

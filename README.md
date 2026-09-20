@@ -1,8 +1,66 @@
 #OSLC Simulink Adapter
 
+## Getting started
 
+```sh
+mvn clean install -DskipTests
+mvn -f edu.gatech.mbsec.adapter.simulink/pom.xml clean jetty:run-war
+```
 
 ## Overview of RESTful web services 
+
+## Migration build modes
+
+The default build is standalone and does not require MATLAB or SVNKit. It loads the packaged XMI fixture and sample SVN data, so the server can be run and integration-tested on any supported development platform.
+
+```text
+mvn clean test
+mvn -Pacceptance clean verify
+```
+
+The optional `full` profile packages the MATLAB scripts and SVNKit-backed implementation. Build and install the SVN module with that profile first, then package the server:
+
+```text
+mvn -f edu.gatech.mbsec.adapter.simulink.svn/pom.xml -Pfull clean install -DskipTests
+mvn -f edu.gatech.mbsec.adapter.simulink/pom.xml -Pfull clean package -DskipTests
+```
+
+The implementation is selected with `simulink.backend=matlab` and `subversion.client.impl=svnkit`; standalone remains the default.
+
+## Runtime configuration
+
+The WAR packages non-secret standalone defaults in
+`edu.gatech.mbsec.adapter.simulink/src/main/resources/config.properties`. These defaults start the
+demo without MATLAB or SVN. Keep the comments and commented-out examples in that file because they
+document the accepted value shapes.
+
+Docker environment variables take precedence. The adapter accepts conventional uppercase snake
+case names, for example:
+
+```text
+SIMULINK_MODELS_DIRECTORY=/data/simulink-models
+SIMULINK_BACKEND=matlab
+SUBVERSION_CLIENT_IMPL=svnkit
+SVN_URL=https://svn.example.test/repository/project
+SVN_USER_NAME=adapter-user
+SVN_PASSWORD=provided-by-secret-store
+```
+
+The legacy `svnUserName` and `svnPassword` entries were removed from the packaged properties file
+because credentials must not be built into the WAR or committed to source control. The properties
+are still supported through `SVN_USER_NAME` and `SVN_PASSWORD`, JVM system properties, JNDI, or an
+external properties file. In Docker, inject them through a secret manager or environment variables.
+
+Set `SIMULINK_CONFIG_FILE=/run/config/simulink.properties` to load an external properties file
+instead of the packaged baseline. Environment variables still override that file. For adapter
+properties, resolution order is environment variable, JVM system property, external or packaged
+properties file, JNDI, then the built-in fallback. Listener properties such as `simulink.backend`,
+`subversion.client.impl`, and `LYO_BASEURL` use environment variable, JVM system property, servlet
+context parameter, JNDI, then their fallback.
+
+The mutable individual-SVN-files list is intentionally not packaged as a classpath resource because
+the web UI writes it at runtime. Configure writable storage before setting
+`USE_INDIVIDUAL_SUBVERSION_FILES=true`.
 
 | Simulink Concept  	| GET	| POST	| PUT	| 	DELETE	|
 | ------------- 	| ------|-------|----	|------		|
@@ -83,6 +141,13 @@ Follow the [Instructions to install edu.gatech.mbsec.adapter.subversion](https:/
 
 
 ### 7.	Manual configuration 
+
+> **Current packaging note:** this historical MATLAB/SVN section predates the standalone seam. The
+> adapter no longer searches the source-tree `configuration` directory automatically. Treat
+> references below to `config.properties` as an external file selected with
+> `SIMULINK_CONFIG_FILE`, or use the equivalent environment variables documented under
+> [Runtime configuration](#runtime-configuration). Never store SVN credentials in the packaged
+> resource or in source control.
 
 Specify the port number of the OSLC Simulink adapter service of in the config.properties file under edu.gatech.mbsec.adapter.simulink/configuration. By default, port 8181 will be used. As an example displayed below, the port number is set to 8181.
 
@@ -353,4 +418,3 @@ URL: http://localhost:8181/oslc4jsimulink/services/resourceShapes
 
 #### Testing the retrieval of Simulink RDF vocabulary hosted by the Simulink adapter in HTML and RDF
 URL: http://localhost:8181/oslc4jsimulink/services/rdfvocabulary
-

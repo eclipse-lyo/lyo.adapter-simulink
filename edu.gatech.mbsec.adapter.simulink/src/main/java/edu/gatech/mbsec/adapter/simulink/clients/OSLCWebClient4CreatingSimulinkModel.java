@@ -17,25 +17,23 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.clients;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
-import org.apache.wink.client.handlers.ClientHandler;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkInputPort;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkLine;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkOutputPort;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkParameter;
-import org.eclipse.lyo.oslc4j.client.OslcRestClient;
+import org.eclipse.lyo.client.OslcClient;
 import org.eclipse.lyo.oslc4j.core.model.Link;
 import org.eclipse.lyo.oslc4j.core.model.QueryCapability;
 import org.eclipse.lyo.oslc4j.core.model.Service;
 import org.eclipse.lyo.oslc4j.core.model.ServiceProvider;
 import org.eclipse.lyo.oslc4j.core.model.ServiceProviderCatalog;
-import org.eclipse.lyo.oslc4j.provider.jena.JenaProvidersRegistry;
 //import org.eclipse.lyo.oslc4j.provider.json4j.Json4JProvidersRegistry;
 
 import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
@@ -59,16 +57,12 @@ import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
  */
 public class OSLCWebClient4CreatingSimulinkModel {
 
-	private static final Set<Class<?>> PROVIDERS = new HashSet<Class<?>>();
+	private static final Logger LOG = LoggerFactory.getLogger(OSLCWebClient4CreatingSimulinkModel.class);
 
-	static {
-		PROVIDERS.addAll(JenaProvidersRegistry.getProviders());
-		// PROVIDERS.addAll(Json4JProvidersRegistry.getProviders());
-	}
 
 	public static void main(String[] args) {
 
-		String baseHTTPURI = "http://localhost:" + OSLC4JSimulinkApplication.portNumber + "/oslc4jsimulink";
+		String baseHTTPURI = "http://localhost:" + OSLC4JSimulinkApplication.portNumber;
 		String projectId = "model11";
 
 		// URI of the HTTP request
@@ -87,25 +81,16 @@ public class OSLCWebClient4CreatingSimulinkModel {
 		int readTimeout = 2400000;
 
 		// set up the credentials for the basic authentication
-		BasicAuthSecurityHandler basicAuthHandler = new BasicAuthSecurityHandler();
 
 		// creating the OSLC REST clients
-		final OslcRestClient oslcSimulinkBlockCreationRestClient = new OslcRestClient(
-				PROVIDERS, simulinkBlockCreationFactoryURI, mediaType,
-				readTimeout, basicAuthHandler);
+		final OslcClient oslcSimulinkBlockCreationRestClient = new OslcClient();
 
-		final OslcRestClient oslcSimulinkParametersRestClient = new OslcRestClient(
-				PROVIDERS, simulinkParametersURI, mediaType, readTimeout,
-				basicAuthHandler);
+		final OslcClient oslcSimulinkParametersRestClient = new OslcClient();
 
-		// final OslcRestClient oslcSimulinkParameterModel_ModelNameRestClient =
-		// new OslcRestClient(
-		// PROVIDERS, simulinkParameterModel_ModelNameURI, mediaType,
-		// readTimeout, basicAuthHandler);
+		// final OslcClient oslcSimulinkParameterModel_ModelNameRestClient =
+		// new OslcClient();
 
-		final OslcRestClient oslcSimulinkLineCreationRestClient = new OslcRestClient(
-				PROVIDERS, simulinkLineCreationFactoryURI, mediaType,
-				readTimeout, basicAuthHandler);
+		final OslcClient oslcSimulinkLineCreationRestClient = new OslcClient();
 
 		try {
 
@@ -556,42 +541,26 @@ public class OSLCWebClient4CreatingSimulinkModel {
 			// *** Invoking the OSLC adapter creation factories ***
 
 			// creating Simulink Blocks
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(ConstantSimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(StepSimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(ModelSimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem1SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Out1SimulinkBlock);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, ConstantSimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, StepSimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, ModelSimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem1SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Out1SimulinkBlock, mediaType);
 
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem1In1SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem1Out1SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2In1SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2xyzSimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2In3SimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2Out1SimulinkBlock);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem1In1SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem1Out1SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2In1SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2xyzSimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2In3SimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2Out1SimulinkBlock, mediaType);
 
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem1GainSimulinkBlock);
-			oslcSimulinkBlockCreationRestClient
-					.addOslcResource(Subsystem2SumSimulinkBlock);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem1GainSimulinkBlock, mediaType);
+			oslcSimulinkBlockCreationRestClient.createResource(simulinkBlockCreationFactoryURI, Subsystem2SumSimulinkBlock, mediaType);
 
 			// creating Simulink Block Parameters
-			oslcSimulinkParametersRestClient
-					.addOslcResource(modelBlockModelNameParameter);
-			oslcSimulinkParametersRestClient
-					.addOslcResource(sumBlockInputsParameter);
+			oslcSimulinkParametersRestClient.createResource(simulinkParametersURI, modelBlockModelNameParameter, mediaType);
+			oslcSimulinkParametersRestClient.createResource(simulinkParametersURI, sumBlockInputsParameter, mediaType);
 
 			// // get the parameter
 			// // retrieving and converting Simulink block parameters
@@ -605,33 +574,21 @@ public class OSLCWebClient4CreatingSimulinkModel {
 			// .updateOslcResourceReturnClientResponse(model_ModelName_SimulinkParameter);
 
 			// creating Simulink lines
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(constantModelLine);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(stepSubsystem1And2Line);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(modelSubsystem2Line);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem1subsystem2Line);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem2out1Line);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, constantModelLine, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, stepSubsystem1And2Line, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, modelSubsystem2Line, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem1subsystem2Line, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem2out1Line, mediaType);
 
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem1In1GainLine);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem1GainOut1Line);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem2In1SumLine);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem2xyzSumLine);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem2In3SumLine);
-			oslcSimulinkLineCreationRestClient
-					.addOslcResource(subsystem2SumOut1Line);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem1In1GainLine, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem1GainOut1Line, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem2In1SumLine, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem2xyzSumLine, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem2In3SumLine, mediaType);
+			oslcSimulinkLineCreationRestClient.createResource(simulinkLineCreationFactoryURI, subsystem2SumOut1Line, mediaType);
 
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}

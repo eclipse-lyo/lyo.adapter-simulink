@@ -17,6 +17,9 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.resources;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,6 +63,8 @@ import org.eclipse.lyo.oslc4j.core.model.OslcConstants;
 import org.eclipse.lyo.oslc4j.core.model.ValueType;
 
 public class OSLCJavaClassesGenerator {
+
+	private static final Logger LOG = LoggerFactory.getLogger(OSLCJavaClassesGenerator.class);
 
 	static EPackage simulinkPackage;
 	static EClass eclass;
@@ -125,8 +130,7 @@ public class OSLCJavaClassesGenerator {
 						fileWriter.append(buffer);
 						fileWriter.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOG.error("Could not write generated Java source", e);
 					}
 
 				}
@@ -151,13 +155,12 @@ public class OSLCJavaClassesGenerator {
 					fileWriter.append(buffer);
 					fileWriter.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("Could not write generated Java source", e);
 				}
 			}
 
 		}
-		System.out.println("OSLC4J code generated");
+		LOG.info("OSLC4J code generated");
 	}
 
 	private static void printJavaTypeReferences(StringBuffer buffer) {

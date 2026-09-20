@@ -17,23 +17,26 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 
 import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
@@ -63,6 +66,8 @@ import edu.gatech.mbsec.adapter.simulink.application.SimulinkManager;
 @OslcService(Constants.SIMULINK_OUTPUTPORT_DOMAIN)
 @Path("{modelName}/outputports")
 public class SimulinkOutputPortService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SimulinkOutputPortService.class);
 	
 	@Context
 	private HttpServletRequest httpServletRequest;
@@ -126,7 +131,7 @@ public class SimulinkOutputPortService {
 			try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			}
 		}
@@ -147,7 +152,7 @@ public class SimulinkOutputPortService {
 			try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			}
 		}

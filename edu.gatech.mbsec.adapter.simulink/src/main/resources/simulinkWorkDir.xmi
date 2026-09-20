@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mathworks.simulink:WorkingDirectory xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:mathworks.simulink="http://www.mathworks.com/products/simulink/">
+	<model name="cruiseControl">
+		<block name="cruiseControl/Constant" type="Constant">
+			<parameter name="Constant/Value" value="1"/>
+			<outputPort xmi:id="Constant/outport/1" id="Constant/outport/1"/>
+		</block>
+		<block name="cruiseControl/Gain" type="Gain">
+			<parameter name="Gain/Gain" value="2"/>
+			<inputPort xmi:id="Gain/inport/1" id="Gain/inport/1"/>
+			<outputPort xmi:id="Gain/outport/1" id="Gain/outport/1"/>
+		</block>
+		<block name="cruiseControl/Sum" type="Sum">
+			<parameter name="Sum/Constant" value="0"/>
+			<inputPort xmi:id="Sum/inport/1" id="Sum/inport/1"/>
+			<outputPort xmi:id="Sum/outport/1" id="Sum/outport/1"/>
+		</block>
+		<line sourcePort="Constant/outport/1" targetPort="Sum/inport/1"/>
+		<line sourcePort="Gain/outport/1" targetPort="Sum/inport/1"/>
+	</model>
+	<model name="engine">
+		<block name="engine/Pulse" type="Pulse">
+			<parameter name="Pulse/Amplitude" value="5"/>
+			<parameter name="Pulse/Period" value="10"/>
+			<outputPort xmi:id="Pulse/outport/1" id="Pulse/outport/1"/>
+		</block>
+	</model>
+</mathworks.simulink:WorkingDirectory>

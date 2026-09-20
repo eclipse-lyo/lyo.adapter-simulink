@@ -29,7 +29,7 @@ import java.util.Map;
 import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import edu.gatech.mbsec.adapter.subversion.SubversionConstants;
 import edu.gatech.mbsec.adapter.subversion.SubversionFileService;
-import org.eclipse.lyo.oslc4j.client.ServiceProviderRegistryURIs;
+import org.eclipse.lyo.oslc4j.core.OSLC4JUtils;
 import org.eclipse.lyo.oslc4j.core.exception.OslcCoreApplicationException;
 import org.eclipse.lyo.oslc4j.core.model.OslcConstants;
 import org.eclipse.lyo.oslc4j.core.model.PrefixDefinition;
@@ -80,8 +80,7 @@ public class SimulinkServiceProviderFactory {
 			final String product, final Map<String, Object> parameterValueMap)
 			throws OslcCoreApplicationException, URISyntaxException {
 		final ServiceProvider serviceProvider = ServiceProviderFactory
-				.createServiceProvider(baseURI, ServiceProviderRegistryURIs
-						.getUIURI(), product,
+				.createServiceProvider(baseURI, OSLC4JUtils.getPublicURI(), product,
 						"Service provider for Simulink model: " + product,
 						new Publisher("Georgia Institute of Technology OSLC Project",
 								"urn:oslc:ServiceProvider"), RESOURCE_CLASSES,

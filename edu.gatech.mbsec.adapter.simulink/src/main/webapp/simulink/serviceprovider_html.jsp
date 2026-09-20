@@ -32,8 +32,11 @@
 <%@ page import="org.eclipse.lyo.oslc4j.core.model.ResourceShape" %>
 <%@ page import="org.eclipse.lyo.oslc4j.core.model.QueryCapability" %>
 <%
-
 ServiceProvider element = (ServiceProvider)request.getAttribute("serviceProvider");
+if (element == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Service Provider not found");
+	return;
+}
 %>
 <html>
 <head>

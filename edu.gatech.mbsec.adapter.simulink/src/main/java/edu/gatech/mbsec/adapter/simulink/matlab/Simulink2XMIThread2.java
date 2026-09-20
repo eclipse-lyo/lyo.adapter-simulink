@@ -17,7 +17,11 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.matlab;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -33,28 +37,31 @@ import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
  */
 public class Simulink2XMIThread2 extends Thread {
 
+	private static final Logger LOG = LoggerFactory.getLogger(Simulink2XMIThread2.class);
+
 	String simulinkModelsFolder = OSLC4JSimulinkApplication.simulinkModelsDirectory;
 	
 	public void run() {
 		long startTime = System.currentTimeMillis();
 		// Execute Matlab from the command prompt
 		try {						
+			String matlabFolder = new File(OSLC4JSimulinkApplication.matlabScriptsDirectory)
+					.getAbsolutePath().replace('\\', '/');
+			String modelsFolder = simulinkModelsFolder == null ? "" : simulinkModelsFolder.replace('\\', '/');
 			Process process = Runtime
 					.getRuntime()
 					.exec("matlab start /wait "
 							+ "-nodisplay -nosplash -nodesktop -r " +
-							"simulink2xmi('" + simulinkModelsFolder + "');exit;");
+							"addpath('" + matlabFolder + "');simulink2xmi('" + modelsFolder + "');exit;");
 			process.waitFor();									
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
-			System.out.println("OSLC Adapter <-> Simulink Interaction in "
+			LOG.info("OSLC Adapter <-> Simulink Interaction in "
 					+ (duration / 1000) + " seconds");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}

@@ -63,7 +63,7 @@ public class SimulinkParameter extends AbstractResource{
 	@OslcDescription("Description of Parameter::name TBD")
 	@OslcName("name")
 	@OslcOccurs(Occurs.ZeroOrOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Parameter_name")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Parameter_name")
 	@OslcTitle("name")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getName() {
@@ -78,7 +78,7 @@ public class SimulinkParameter extends AbstractResource{
 	@OslcDescription("Description of Parameter::value TBD")
 	@OslcName("value")
 	@OslcOccurs(Occurs.ZeroOrOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Parameter_value")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Parameter_value")
 	@OslcTitle("value")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getValue() {

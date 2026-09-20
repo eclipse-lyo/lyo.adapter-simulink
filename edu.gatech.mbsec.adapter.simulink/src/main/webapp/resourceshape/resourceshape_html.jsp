@@ -29,8 +29,11 @@
 <%@ page import="org.eclipse.lyo.oslc4j.core.model.Property" %>
 	
 <%
-
 ResourceShape resource = (ResourceShape)request.getAttribute("resource");
+if (resource == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource Shape not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 %>
 <html>

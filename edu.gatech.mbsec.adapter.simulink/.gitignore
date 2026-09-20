@@ -1,3 +1,4 @@
-/target
-/.settings/
-
+target/
+.settings/*.prefs
+.settings/*.prefs.xml
+/jsp/

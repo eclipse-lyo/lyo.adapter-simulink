@@ -68,7 +68,7 @@ public class SimulinkWorkingDirectory extends AbstractResource{
 	@OslcDescription("Description of WorkingDirectory::model TBD")
 	@OslcName("model")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#WorkingDirectory_model")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "WorkingDirectory_model")
 	@OslcTitle("model")
 	@OslcReadOnly(false)
 	public Link[]  getModels() {

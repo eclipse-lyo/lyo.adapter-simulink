@@ -45,7 +45,7 @@ public interface Constants
     public static String MBSE_NAMESPACE							 = "http://eclipse.org/MBSE/";
 	
     public static String SIMULINK_PREFIX							 = "simulink";
-    public static String SIMULINK_NAMESPACE							 = "http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#";	
+    public static String SIMULINK_NAMESPACE							 = "http://example.com/ns/oslc_simulink#";	
     
     public static String SIMULINK_MODEL_PREFIX                    	 = "simulink_model";
     public static String SIMULINK_BLOCK_PREFIX                     	 = "simulink_block";

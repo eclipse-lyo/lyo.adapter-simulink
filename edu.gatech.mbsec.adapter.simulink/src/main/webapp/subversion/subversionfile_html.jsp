@@ -28,8 +28,11 @@
 <%@ page import="edu.gatech.mbsec.adapter.subversion.SubversionFile" %>
 	
 <%
-
 SubversionFile resource = (SubversionFile)request.getAttribute("resource");
+if (resource == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Subversion File not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 %>
 <html>

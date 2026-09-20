@@ -17,27 +17,30 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
@@ -64,6 +67,8 @@ import edu.gatech.mbsec.adapter.simulink.serviceproviders.ServiceProviderCatalog
 @OslcService(Constants.SIMULINK_MODEL_DOMAIN)
 @Path("{modelName}/model")
 public class SimulinkModelService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SimulinkModelService.class);
 	
 	@Context
 	private HttpServletRequest httpServletRequest;
@@ -94,18 +99,6 @@ public class SimulinkModelService {
 		return simulinkModel;
 	}
 	
-	@GET	
-	@Produces({ OslcMediaType.APPLICATION_RDF_XML,
-			OslcMediaType.APPLICATION_JSON })
-	public edu.gatech.mbsec.adapter.simulink.resources.SimulinkModel getModel(
-			@PathParam("modelName") final String modelName)
-			throws URISyntaxException {
-		SimulinkManager.loadSimulinkWorkingDirectory();
-		SimulinkModel simulinkModel = SimulinkManager
-				.getModelByName(modelName);
-		return simulinkModel;
-	}
-	
 	@GET
     @Produces(MediaType.TEXT_HTML)
     public void getHtmlModel(@PathParam("modelName") final String modelName)
@@ -127,7 +120,7 @@ public class SimulinkModelService {
     		try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {				
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			} 
     	}
@@ -150,7 +143,7 @@ public class SimulinkModelService {
 			finalModelName = modelName;
 		}
 		
-		SimulinkManager.createSimulinkElements(newElements, finalModelName);		
+		SimulinkManager.getBackend().createElements(newElements, finalModelName);
 		URI about = newElements.getAbout();
 		return Response.created(about).entity(newElements).build();
 	}

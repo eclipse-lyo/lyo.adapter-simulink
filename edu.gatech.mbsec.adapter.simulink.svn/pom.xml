@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
+		<artifactId>oslc4j-simulink-parent</artifactId>
+		<version>1.1.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>edu.gatech.mbsec.adapter.simulink</groupId>
+	<artifactId>oslc4jsimulink-svn</artifactId>
+	<version>1.1.0</version>
+	<packaging>jar</packaging>
+	<name>oslc4jsimulink-svn</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.17</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>full</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.tmatesoft.svnkit</groupId>
+					<artifactId>svnkit</artifactId>
+					<version>1.10.11</version>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>3.6.0</version>
+						<executions>
+							<execution>
+								<id>add-full-sources</id>
+								<phase>generate-sources</phase>
+								<goals><goal>add-source</goal></goals>
+								<configuration>
+									<sources><source>src/full/java</source></sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

@@ -28,8 +28,11 @@
 <%@ page
 	import="edu.gatech.mbsec.adapter.simulink.resources.SimulinkParameter"%>
 <%
-
 SimulinkParameter element = (SimulinkParameter)request.getAttribute("element");
+if (element == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Simulink Parameter not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 %>
 <html>

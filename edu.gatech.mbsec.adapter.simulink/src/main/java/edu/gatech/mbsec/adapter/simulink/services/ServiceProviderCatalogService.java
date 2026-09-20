@@ -22,26 +22,29 @@
  *******************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.swing.JOptionPane;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response;
 
 import edu.gatech.mbsec.adapter.simulink.resources.Constants;
 import org.eclipse.lyo.oslc4j.core.annotation.OslcDialog;
@@ -72,7 +75,9 @@ import edu.gatech.mbsec.adapter.simulink.serviceproviders.ServiceProviderCatalog
 @OslcService(OslcConstants.OSLC_CORE_DOMAIN)
 @Path("catalog")
 public class ServiceProviderCatalogService
-{
+		{
+
+	private static final Logger LOG = LoggerFactory.getLogger(ServiceProviderCatalogService.class);
 	@Context private HttpServletRequest httpServletRequest;
 	@Context private HttpServletResponse httpServletResponse;
 	@Context private UriInfo uriInfo;
@@ -185,7 +190,7 @@ public class ServiceProviderCatalogService
     		try {
 				rd.forward(httpServletRequest, httpServletResponse);
 			} catch (Exception e) {				
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 				throw new WebApplicationException(e);
 			} 
     	}

@@ -63,7 +63,7 @@ public class SimulinkModel extends AbstractResource{
 	@OslcDescription("Description of Model::name TBD")
 	@OslcName("name")
 	@OslcOccurs(Occurs.ZeroOrOne)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Model_name")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Model_name")
 	@OslcTitle("name")
 	@OslcValueType(ValueType.XMLLiteral)
 	public String getName() {
@@ -83,7 +83,7 @@ public class SimulinkModel extends AbstractResource{
 	@OslcDescription("Description of Model::block TBD")
 	@OslcName("block")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Model_block")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Model_block")
 	@OslcTitle("block")
 	@OslcReadOnly(false)
 	public Link[]  getBlocks() {
@@ -104,7 +104,7 @@ public class SimulinkModel extends AbstractResource{
 	@OslcDescription("Description of Model::line TBD")
 	@OslcName("line")
 	@OslcOccurs(Occurs.ZeroOrMany)
-	@OslcPropertyDefinition("http://localhost:8181/oslc4jsimulink/services/rdfvocabulary#Model_line")
+	@OslcPropertyDefinition(Constants.SIMULINK_NAMESPACE + "Model_line")
 	@OslcTitle("line")
 	@OslcReadOnly(false)
 	public Link[]  getLines() {

@@ -17,34 +17,29 @@
  *******************************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.clients;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
-import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
-import org.apache.wink.client.handlers.ClientHandler;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkBlock;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkElementsToCreate;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkInputPort;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkLine;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkOutputPort;
 import edu.gatech.mbsec.adapter.simulink.resources.SimulinkParameter;
-import org.eclipse.lyo.oslc4j.client.OslcRestClient;
+import org.eclipse.lyo.client.OslcClient;
 import org.eclipse.lyo.oslc4j.core.model.Link;
 import org.eclipse.lyo.oslc4j.core.model.QueryCapability;
 import org.eclipse.lyo.oslc4j.core.model.Service;
 import org.eclipse.lyo.oslc4j.core.model.ServiceProvider;
 import org.eclipse.lyo.oslc4j.core.model.ServiceProviderCatalog;
-import org.eclipse.lyo.oslc4j.provider.jena.JenaProvidersRegistry;
 //import org.eclipse.lyo.oslc4j.provider.json4j.Json4JProvidersRegistry;
 
 import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
@@ -68,16 +63,12 @@ import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
  */
 public class OSLCWebClient4CreatingSimulinkElements {
 
-	private static final Set<Class<?>> PROVIDERS = new HashSet<Class<?>>();
+	private static final Logger LOG = LoggerFactory.getLogger(OSLCWebClient4CreatingSimulinkElements.class);
 
-	static {
-		PROVIDERS.addAll(JenaProvidersRegistry.getProviders());
-		// PROVIDERS.addAll(Json4JProvidersRegistry.getProviders());
-	}
 
 	public static void main(String[] args) {
 
-		String baseHTTPURI = "http://localhost:" + OSLC4JSimulinkApplication.portNumber + "/oslc4jsimulink";
+		String baseHTTPURI = "http://localhost:" + OSLC4JSimulinkApplication.portNumber;
 		String projectId = "model15";
 
 		// URI of the HTTP request
@@ -92,11 +83,8 @@ public class OSLCWebClient4CreatingSimulinkElements {
 		int readTimeout = 2400000;
 
 		// set up the credentials for the basic authentication
-		BasicAuthSecurityHandler basicAuthHandler = new BasicAuthSecurityHandler();
 
-		final OslcRestClient oslcSimulinkElementsToCreateRestClient = new OslcRestClient(
-				PROVIDERS, simulinkElementsToCreateURI, mediaType, readTimeout,
-				basicAuthHandler);
+		final OslcClient oslcSimulinkElementsToCreateRestClient = new OslcClient();
 
 		try {
 
@@ -588,7 +576,7 @@ public class OSLCWebClient4CreatingSimulinkElements {
 					.setAbout(URI
 							.create(baseHTTPURI + "/services/model11/model/elementstocreate"));
 
-			oslcSimulinkElementsToCreateRestClient.addOslcResource(newElements);
+			oslcSimulinkElementsToCreateRestClient.createResource(simulinkElementsToCreateURI, newElements, mediaType);
 
 			// // creating Simulink Blocks
 			// oslcSimulinkBlockCreationRestClient
@@ -666,8 +654,7 @@ public class OSLCWebClient4CreatingSimulinkElements {
 			// .addOslcResource(subsystem2SumOut1Line);
 
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}

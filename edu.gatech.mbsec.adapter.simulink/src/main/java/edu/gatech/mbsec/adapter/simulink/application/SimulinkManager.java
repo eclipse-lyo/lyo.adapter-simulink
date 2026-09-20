@@ -18,6 +18,11 @@
 
 package edu.gatech.mbsec.adapter.simulink.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.eclipse.lyo.oslc4j.core.OSLC4JUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -53,7 +58,6 @@ import edu.gatech.mbsec.adapter.subversion.SubversionFile;
 import org.eclipse.lyo.oslc4j.core.model.AbstractResource;
 import org.eclipse.lyo.oslc4j.core.model.Link;
 
-import edu.gatech.mbsec.adapter.simulink.matlab.Simulink2XMIThread2;
 import edu.gatech.mbsec.adapter.simulink.serviceproviders.ServiceProviderCatalogSingleton;
 import edu.gatech.mbsec.adapter.simulink.services.OSLC4JSimulinkApplication;
 import simulink.Block;
@@ -76,6 +80,8 @@ import simulink.WorkingDirectory;
  * @author Axel Reichwein (axel.reichwein@koneksys.com)
  */
 public class SimulinkManager {
+
+	private static final Logger LOG = LoggerFactory.getLogger(SimulinkManager.class);
 
 	static int sessionID = 1;
 
@@ -101,9 +107,28 @@ public class SimulinkManager {
 
 	public static WorkingDirectory simulinkWorkingDirectory = null;
 
+	/**
+	 * Backend used to obtain the Simulink {@link WorkingDirectory}. Selected via
+	 * the {@code simulink.backend} configuration flag: {@code xmi} (default,
+	 * loads the pre-generated XMI fixture packaged under {@code src/main/resources},
+	 * no matlab.exe -- used for tests and MATLAB-less environments) or
+	 * {@code matlab} (runs MATLAB). The standalone XMI backend is the default so
+	 * the OSLC server starts without an external MATLAB installation.
+	 */
+	private static SimulationModelBackend backend;
+
+	static {
+		final String type = System.getProperty("simulink.backend", "xmi");
+		if ("xmi".equalsIgnoreCase(type)) {
+			backend = new SimulationModelBackendStandaloneImpl();
+		} else {
+			backend = new MatlabImpl();
+		}
+	}
+
 	static StringBuffer buffer;
 
-	public static String baseHTTPURI = "http://localhost:" + OSLC4JSimulinkApplication.portNumber + "/oslc4jsimulink";
+	public static String baseHTTPURI = OSLC4JUtils.getPublicURI() != null ? OSLC4JUtils.getPublicURI() : ("http://localhost:" + OSLC4JSimulinkApplication.portNumber);
 	static String projectId;
 
 	public static void main(String[] args) {
@@ -139,32 +164,16 @@ public class SimulinkManager {
 				qNameOslcSimulinkLineMap.clear();
 				qNameOslcSimulinkParameterMap.clear();
 
-				// run matlab script
-				long startTime = System.currentTimeMillis();
-				Simulink2XMIThread2 simulink2XMIThread = new Simulink2XMIThread2();
-				simulink2XMIThread.start();
-				try {
-					simulink2XMIThread.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				long endTime = System.currentTimeMillis();
-				long duration = endTime - startTime;
-				//System.out.println("OSLC Adapter <-> Simulink Interaction in " + (duration) + " milli seconds");
-
 				try{
-					// load Simulink XMI file
-					Resource ecoreResource = loadEcoreModel(org.eclipse.emf.common.util.URI.createFileURI(
-							new File(OSLC4JSimulinkApplication.simulinkModelsDirectory + "/simulinkWorkDir.xmi")
-									.getAbsolutePath()));
-
-					// load Simulink working directory
-					simulinkWorkingDirectory = (WorkingDirectory) EcoreUtil.getObjectByType(ecoreResource.getContents(),
-							SimulinkPackage.eINSTANCE.getWorkingDirectory());
+					// Load the Simulink working directory through the configured backend
+					// (MATLAB by default; an XMI fixture for tests / MATLAB-less runs).
+					simulinkWorkingDirectory = backend.loadWorkingDirectory();
+					if (simulinkWorkingDirectory == null) {
+						return;
+					}
 
 					for (Model model : simulinkWorkingDirectory.getModel()) {
-						//System.out.println("MODEL " + model.getName());
+						LOG.debug("MODEL {}", model.getName());
 						projectId = model.getName();
 
 						// create OSLC Simulink model
@@ -184,12 +193,11 @@ public class SimulinkManager {
 							simulinkModel.setLines(linesLinks);
 
 						} catch (URISyntaxException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							LOG.error("Unhandled exception", e);
 						}
 
 						for (Block block : model.getBlock()) {
-							//System.out.println("\tBLOCK " + block.getName());
+							LOG.debug("\tBLOCK {}", block.getName());
 
 							// create OSLC Simulink block
 							try {
@@ -218,12 +226,11 @@ public class SimulinkManager {
 								simulinkBlock.setOutputPorts(outputPortLinks);
 
 							} catch (URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								LOG.error("Unhandled exception", e);
 							}
 
 							for (Parameter parameter : block.getParameter()) {
-								//System.out.println("\t\tPARAMETER " + parameter.getName());
+								LOG.debug("\t\tPARAMETER {}", parameter.getName());
 
 								// create OSLC Simulink block parameter
 								try {
@@ -240,12 +247,11 @@ public class SimulinkManager {
 											simulinkParameter);
 									oslcSimulinkParameters.add(simulinkParameter);
 								} catch (URISyntaxException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									LOG.error("Unhandled exception", e);
 								}
 							}
 							for (InputPort inputPort : block.getInputPort()) {
-								//System.out.println("\t\tINPUTPORT " + inputPort.getId());
+								LOG.debug("\t\tINPUTPORT {}", inputPort.getId());
 
 								// create OSLC Simulink input port
 								try {
@@ -258,12 +264,11 @@ public class SimulinkManager {
 											simulinkInputPort);
 									oslcSimulinkInputPorts.add(simulinkInputPort);
 								} catch (URISyntaxException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									LOG.error("Unhandled exception", e);
 								}
 							}
 							for (OutputPort outputPort : block.getOutputPort()) {
-								//System.out.println("\t\tOUTPUTPORT " + outputPort.getId());
+								LOG.debug("\t\tOUTPUTPORT {}", outputPort.getId());
 								// create OSLC Simulink output port
 								try {
 									SimulinkOutputPort simulinkOutputPort = new SimulinkOutputPort(
@@ -275,14 +280,13 @@ public class SimulinkManager {
 											simulinkOutputPort);
 									oslcSimulinkOutputPorts.add(simulinkOutputPort);
 								} catch (URISyntaxException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									LOG.error("Unhandled exception", e);
 								}
 							}
 						}
 						for (Line line : model.getLine()) {
 							try {
-								//System.out.println("\tLINE " + line.getSourcePort().getId() + " <--> ");
+								LOG.debug("\tLINE {} <--> ", line.getSourcePort().getId());
 								// create OSLC Simulink line
 								SimulinkLine simulinkLine = new SimulinkLine(java.net.URI.create(
 										baseHTTPURI + "/services/" + projectId + "/lines/" + getQualifiedName(line, null)));
@@ -292,7 +296,7 @@ public class SimulinkManager {
 								Link[] targetPortsLink = new Link[line.getTargetPort().size()];
 								int i = 0;
 								for (Port targetPort : line.getTargetPort()) {
-//									System.out.println(targetPort.getId());
+									LOG.debug("\t\t\t{}", targetPort.getId());
 									URI targetPortURI = URI.create(baseHTTPURI + "/services/" + projectId + "/inputports/"
 											+ getQualifiedName(targetPort, null));
 									targetPortsLink[i] = new Link(targetPortURI);
@@ -328,14 +332,14 @@ public class SimulinkManager {
 								}
 
 							} catch (URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								LOG.error("Unhandled exception", e);
 							}
 						}
 					}
 				}
 				catch(Exception e){
 					// ecoreResource may not have been created because there is no Subversion file to load
+					LOG.trace("No Subversion Ecore resource was available to load", e);
 				}
 				
 				
@@ -344,12 +348,26 @@ public class SimulinkManager {
 		thread.start();
 		try {
 			thread.join();
-			System.out.println("Data read from " + OSLC4JSimulinkApplication.simulinkModelsDirectory
-					+ " and converted into OSLC resources at " + new Date().toString());
+			LOG.info("Data read from {} and converted into OSLC resources at {}",
+					OSLC4JSimulinkApplication.simulinkModelsDirectory, new Date());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
+	}
+
+	public static SimulationModelBackend getBackend() {
+		return backend;
+	}
+
+	/**
+	 * Loads a Simulink working directory from an XMI file (used by both the
+	 * MATLAB and the XMI-file backends).
+	 */
+	public static WorkingDirectory loadWorkingDirectoryFromXmi(final File xmiFile) throws Exception {
+		final Resource ecoreResource = loadEcoreModel(
+				org.eclipse.emf.common.util.URI.createFileURI(xmiFile.getAbsolutePath()));
+		return (WorkingDirectory) EcoreUtil.getObjectByType(ecoreResource.getContents(),
+				SimulinkPackage.eINSTANCE.getWorkingDirectory());
 	}
 
 	private static Resource loadEcoreModel(org.eclipse.emf.common.util.URI fileURI) {
@@ -548,8 +566,7 @@ public class SimulinkManager {
 				linksArray[linksArrayIndex] = link;
 				linksArrayIndex++;
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Unhandled exception", e);
 			}
 		}
 		return linksArray;
@@ -652,18 +669,15 @@ public class SimulinkManager {
 							+ modelName + "','" + simulinkBlockType + "','" + simulinkBlockQualifiedName + "');");
 			int exitValue = addBlockProcess.waitFor();
 			if (exitValue == 0) {
-				System.out.println("added " + simulinkBlock.getName() + " Block to model " + modelName);
+				LOG.info("added {} Block to model {}", simulinkBlock.getName(), modelName);
 			} else {
-				System.err.println(
-						"NOT added " + simulinkBlock.getName() + " Block to model " + modelName + "\tView log file!");
+					LOG.error("NOT added {} Block to model {}\tView log file!", simulinkBlock.getName(), modelName);
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}
@@ -683,19 +697,16 @@ public class SimulinkManager {
 							+ simulinkParameter.getValue() + "');");
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
-				System.out.println(
-						"set " + simulinkParameter.getName() + " Parameter to value " + simulinkParameter.getValue());
+					LOG.info("set {} Parameter to value {}", simulinkParameter.getName(), simulinkParameter.getValue());
 			} else {
-				System.err.println("NOT set " + simulinkParameter.getName() + " Parameter to value "
-						+ simulinkParameter.getValue() + "\tView log file!");
+				LOG.error("NOT set {} Parameter to value {}\tView log file!",
+						simulinkParameter.getName(), simulinkParameter.getValue());
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}
@@ -769,17 +780,15 @@ public class SimulinkManager {
 			setParamProcess = Runtime.getRuntime().exec(matlabCommandString);
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
-				System.out.println("added " + simulinkLine.getAbout());
+				LOG.info("added {}", simulinkLine.getAbout());
 			} else {
-				System.out.println("NOT added " + simulinkLine.getAbout() + "\tView log file!");
+				LOG.error("NOT added {}\tView log file!", simulinkLine.getAbout());
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 
 	}
@@ -930,17 +939,15 @@ public class SimulinkManager {
 			setParamProcess = Runtime.getRuntime().exec(matlabCommandString);
 			int exitValue = setParamProcess.waitFor();
 			if (exitValue == 0) {
-				System.out.println("added " + newElements.getAbout());
+				LOG.info("added {}", newElements.getAbout());
 			} else {
-				System.out.println("NOT added " + newElements.getAbout() + "\tView log file!");
+				LOG.error("NOT added {}\tView log file!", newElements.getAbout());
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 		}
 	}
 

@@ -30,6 +30,10 @@
 <%@ page import="edu.gatech.mbsec.adapter.simulink.resources.SimulinkModel" %>
 <%
 SimulinkModel model = (SimulinkModel)request.getAttribute("model");
+if (model == null) {
+	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Simulink Model not found");
+	return;
+}
 String requestURL = (String)request.getAttribute("requestURL");
 String modelName = (String) request.getAttribute("modelName");
 %>

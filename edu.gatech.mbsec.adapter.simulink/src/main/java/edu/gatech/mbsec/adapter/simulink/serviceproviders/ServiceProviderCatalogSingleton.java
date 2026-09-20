@@ -22,6 +22,9 @@
  *******************************************************************************/
 package edu.gatech.mbsec.adapter.simulink.serviceproviders;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URI;
@@ -39,12 +42,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 import edu.gatech.mbsec.adapter.subversion.SubversionServiceProviderFactory;
-import org.eclipse.lyo.oslc4j.client.ServiceProviderRegistryURIs;
+import org.eclipse.lyo.oslc4j.core.OSLC4JUtils;
 import org.eclipse.lyo.oslc4j.core.exception.OslcCoreApplicationException;
 import org.eclipse.lyo.oslc4j.core.model.Publisher;
 import org.eclipse.lyo.oslc4j.core.model.Service;
@@ -71,6 +74,8 @@ import simulink.Model;
  * provider collection request.
  */
 public class ServiceProviderCatalogSingleton {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ServiceProviderCatalogSingleton.class);
 	private static final ServiceProviderCatalog serviceProviderCatalog;
 	public static final SortedMap<String, ServiceProvider> serviceProviders = new TreeMap<String, ServiceProvider>();
 	// public static final Map<String, ServiceProvider> serviceProviders = new
@@ -80,7 +85,11 @@ public class ServiceProviderCatalogSingleton {
 		try {
 			serviceProviderCatalog = new ServiceProviderCatalog();
 
-			serviceProviderCatalog.setAbout(new URI(ServiceProviderRegistryURIs.getServiceProviderRegistryURI()));
+			String servletURI = OSLC4JUtils.getServletURI();
+			if (servletURI.endsWith("/")) {
+				servletURI = servletURI.substring(0, servletURI.length() - 1);
+			}
+			serviceProviderCatalog.setAbout(new URI(servletURI + "/catalog/singleton"));
 			serviceProviderCatalog.setTitle("OSLC Service Provider Catalog");
 			serviceProviderCatalog.setDescription("OSLC Service Provider Catalog");
 			serviceProviderCatalog
@@ -233,7 +242,7 @@ public class ServiceProviderCatalogSingleton {
 			List<String> modelNames = new ArrayList<String>();
 
 			SimulinkManager.loadSimulinkWorkingDirectory();
-			String basePath = "http://localhost:" + OSLC4JSimulinkApplication.portNumber + "/oslc4jsimulink/services";
+			String basePath = OSLC4JUtils.getPublicURI() != null ? (OSLC4JUtils.getPublicURI() + "/services") : ("http://localhost:" + OSLC4JSimulinkApplication.portNumber) + "/services";
 
 			// as individual subversion files can get chosen to to be published by adapter, the initial set of files to be published can be empty
 			// in that case, simulinkWorkingDirectory = null
@@ -251,8 +260,7 @@ public class ServiceProviderCatalogSingleton {
 									simulinkModel.getName(), parameterMap);
 							registerServiceProvider(basePath, simulinkServiceProvider, simulinkModel.getName());
 						} catch (OslcCoreApplicationException | URISyntaxException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							LOG.error("Unhandled exception", e);
 						}
 
 					}
@@ -268,11 +276,9 @@ public class ServiceProviderCatalogSingleton {
 							"Subversion Files");
 					registerServiceProvider(basePath, subversionFileServiceProvider, "subversionfiles");
 				} catch (OslcCoreApplicationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("Unhandled exception", e);
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("Unhandled exception", e);
 				}
 
 			}
@@ -293,7 +299,7 @@ public class ServiceProviderCatalogSingleton {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Unhandled exception", e);
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 	}
