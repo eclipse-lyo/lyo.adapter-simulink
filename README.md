@@ -1,4 +1,4 @@
-#OSLC Simulink Adapter
+# OSLC Simulink Adapter
 
 ## Getting started
 
