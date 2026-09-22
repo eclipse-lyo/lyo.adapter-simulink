@@ -38,6 +38,9 @@ public final class MatlabCommand {
 	}
 
 	public static Process start(final String matlabScript) throws IOException {
-		return new ProcessBuilder(arguments(matlabScript)).start();
+		// MATLAB writes startup and conversion diagnostics.  Inheriting the
+		// adapter's streams prevents the child process from blocking on an
+		// unconsumed stdout/stderr pipe during model conversion.
+		return new ProcessBuilder(arguments(matlabScript)).inheritIO().start();
 	}
 }

@@ -40,13 +40,19 @@ public class Simulink2XMIThread2 extends Thread {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Simulink2XMIThread2.class);
 
-	String simulinkModelsFolder = OSLC4JSimulinkApplication.simulinkModelsDirectory;
+	private final String simulinkModelsFolder;
+	private final String matlabScriptsFolder;
+
+	public Simulink2XMIThread2(final String simulinkModelsFolder, final String matlabScriptsFolder) {
+		this.simulinkModelsFolder = simulinkModelsFolder;
+		this.matlabScriptsFolder = matlabScriptsFolder;
+	}
 	
 	public void run() {
 		long startTime = System.currentTimeMillis();
 		// Execute Matlab from the command prompt
 		try {						
-			String matlabFolder = new File(OSLC4JSimulinkApplication.matlabScriptsDirectory)
+			String matlabFolder = new File(matlabScriptsFolder)
 					.getAbsolutePath().replace('\\', '/');
 			String modelsFolder = simulinkModelsFolder == null ? "" : simulinkModelsFolder.replace('\\', '/');
 			Process process = MatlabCommand.start("addpath("
