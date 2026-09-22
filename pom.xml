@@ -14,7 +14,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>27</maven.compiler.release>
+		<!-- Run the build on JDK 27 while keeping bytecode compatible with Jetty 12's ASM scanner. -->
+		<maven.compiler.release>17</maven.compiler.release>
 		<version.lyo>7.0.0.Beta1</version.lyo>
 	</properties>
 
