@@ -8,6 +8,15 @@
     <param-name>simulink.backend</param-name>
     <param-value>xmi</param-value>
   </context-param>
+  <filter>
+    <filter-name>Simulink write authorization</filter-name>
+    <filter-class>edu.gatech.mbsec.adapter.simulink.security.SimulinkWriteAuthorizationFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>Simulink write authorization</filter-name>
+    <url-pattern>/services/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
   <listener>
     <listener-class>edu.gatech.mbsec.adapter.simulink.servlet.ServletListener</listener-class>
   </listener>

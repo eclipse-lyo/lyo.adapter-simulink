@@ -27,6 +27,8 @@ mvn -f edu.gatech.mbsec.adapter.simulink/pom.xml -Pfull clean package -DskipTest
 
 The implementation is selected with `simulink.backend=matlab` and `subversion.client.impl=svnkit`; standalone remains the default.
 
+Write operations under `/services/*` (`POST` and `PUT`) require a bearer token in the `Authorization` header. Configure the token through the `SIMULINK_WRITE_TOKEN` environment variable or the `simulink.writeToken` JVM system property; requests without a matching token are rejected. Read-only `GET` and `HEAD` requests remain available without this token.
+
 ## Runtime configuration
 
 The WAR packages non-secret standalone defaults in
