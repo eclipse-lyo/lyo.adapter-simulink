@@ -14,6 +14,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>27</maven.compiler.release>
 		<version.lyo>7.0.0.Beta1</version.lyo>
 	</properties>
 
