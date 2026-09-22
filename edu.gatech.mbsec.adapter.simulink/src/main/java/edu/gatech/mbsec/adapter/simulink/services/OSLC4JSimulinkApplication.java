@@ -463,19 +463,11 @@ public class OSLC4JSimulinkApplication extends jakarta.ws.rs.core.Application {
 	}
 
 	public static void readDataFirstTime() {
-		Thread thread = new Thread() {
-			public void start() {
-				subversionManager = new SubversionManager(SimulinkManager.baseHTTPURI, subversionService);
-				reloadSimulinkModels();
-			}
-		};
-		thread.start();
-		try {
-			thread.join();
-			LOG.info("Simulink files read. Initialization of OSLC Simulink adapter finished.");
-		} catch (InterruptedException e) {
-			LOG.error("Unhandled exception", e);
-		}
+		// Startup is synchronous; the old Thread subclass overrode start() and
+		// ran on this thread before immediately joining itself.
+		subversionManager = new SubversionManager(SimulinkManager.baseHTTPURI, subversionService);
+		reloadSimulinkModels();
+		LOG.info("Simulink files read. Initialization of OSLC Simulink adapter finished.");
 	}
 
 	public static void readDataPeriodically() {

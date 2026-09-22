@@ -33,7 +33,11 @@ public final class MatlabCommand {
 	}
 
 	static List<String> arguments(final String matlabScript) {
-		return Arrays.asList("matlab", "start", "/wait", "-nodisplay", "-nosplash", "-nodesktop", "-r",
+		return arguments(System.getProperty("matlab.executable", "matlab"), matlabScript);
+	}
+
+	static List<String> arguments(final String matlabExecutable, final String matlabScript) {
+		return Arrays.asList(matlabExecutable, "start", "/wait", "-nodisplay", "-nosplash", "-nodesktop", "-r",
 				matlabScript);
 	}
 

@@ -139,11 +139,9 @@ public class SimulinkManager {
 		if (simulinkWorkingDirectory != null) {
 			return;
 		}
-		Thread thread = new Thread() {
-			public void start() {
-
-				
-				
+		// This setup is synchronous: the previous Thread subclass overrode start()
+		// and performed this work on the caller anyway.
+		{
 				simulinkModels.clear();
 				simulinkBlocks.clear();
 				simulinkInputPorts.clear();
@@ -338,21 +336,12 @@ public class SimulinkManager {
 					}
 				}
 				catch(Exception e){
-					// ecoreResource may not have been created because there is no Subversion file to load
-					LOG.trace("No Subversion Ecore resource was available to load", e);
+					simulinkWorkingDirectory = null;
+					throw new IllegalStateException("Unable to load the Simulink working directory", e);
 				}
-				
-				
-			}
-		};
-		thread.start();
-		try {
-			thread.join();
-			LOG.info("Data read from {} and converted into OSLC resources at {}",
-					OSLC4JSimulinkApplication.simulinkModelsDirectory, new Date());
-		} catch (InterruptedException e) {
-			LOG.error("Unhandled exception", e);
 		}
+		LOG.info("Data read from {} and converted into OSLC resources at {}",
+				OSLC4JSimulinkApplication.simulinkModelsDirectory, new Date());
 	}
 
 	public static SimulationModelBackend getBackend() {

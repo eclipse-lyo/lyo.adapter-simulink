@@ -25,6 +25,13 @@ class MatlabCommandTest {
 	}
 
 	@Test
+	void supportsAnExplicitMatlabExecutablePath() {
+		assertEquals(List.of("C:\\Program Files\\MATLAB\\R2026a\\bin\\matlab.exe", "start", "/wait",
+				"-nodisplay", "-nosplash", "-nodesktop", "-r", "exit;"),
+				MatlabCommand.arguments("C:\\Program Files\\MATLAB\\R2026a\\bin\\matlab.exe", "exit;"));
+	}
+
+	@Test
 	void rejectsControlCharacters() {
 		assertThrows(IllegalArgumentException.class, () -> MatlabCommand.stringLiteral("safe\nclose_system"));
 	}

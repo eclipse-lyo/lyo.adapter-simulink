@@ -292,8 +292,9 @@ end
 fprintf(simulinkXMIFile, '%s', '</mathworks.simulink:WorkingDirectory>');
 fclose(simulinkXMIFile);
 
-catch 
-   
+catch exception
+    fprintf(2, '%s\n', getReport(exception, 'extended', 'hyperlinks', 'off'));
+    rethrow(exception);
 end
 
 end
