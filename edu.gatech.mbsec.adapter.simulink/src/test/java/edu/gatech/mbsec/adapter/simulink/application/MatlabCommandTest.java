@@ -20,7 +20,8 @@ class MatlabCommandTest {
 	void preservesTheCompleteMatlabScriptAsOneProcessArgument() {
 		final String script = "addSimulinkParameter('model','Block','Gain','1'');system(''calc'');%');";
 
-		assertEquals(List.of("matlab", "start", "/wait", "-nodisplay", "-nosplash", "-nodesktop", "-r", script),
+		assertEquals(List.of(System.getProperty("matlab.executable", "matlab"), "start", "/wait", "-nodisplay",
+				"-nosplash", "-nodesktop", "-r", script),
 				MatlabCommand.arguments(script));
 	}
 

@@ -29,6 +29,31 @@ The implementation is selected with `simulink.backend=matlab` and `subversion.cl
 
 Write operations under `/services/*` (`POST` and `PUT`) require a bearer token in the `Authorization` header. Configure the token through the `SIMULINK_WRITE_TOKEN` environment variable or the `simulink.writeToken` JVM system property; requests without a matching token are rejected. Read-only `GET` and `HEAD` requests remain available without this token.
 
+## MATLAB and Simulink live verification
+
+The live integration profile exercises the MATLAB-backed converter against every packaged `.slx`
+model, repeats the conversion three times, checks the resulting XMI models, blocks, and lines, and
+checks that the running adapter can serve a model converted by MATLAB. It requires an installed and
+licensed MATLAB/Simulink environment; the normal build and HTTP acceptance profile remain standalone.
+
+Verified locally on 2026-09-23 with MATLAB R2026a Update 5 (26.1.0.3346908) and Simulink 26.1.
+The Simulink license check passed and the Simulink library loaded successfully. All three live
+integration tests passed against the MATLAB-backed adapter.
+
+On Windows PowerShell, run the live tests with the MATLAB installation on `PATH` and the MATLAB
+backend pointed at the staged model fixtures (so generated XMI stays under `target`):
+
+```powershell
+$env:SIMULINK_BACKEND = 'matlab'
+$env:SUBVERSION_CLIENT_IMPL = 'standalone'
+$env:SIMULINK_MODELS_DIRECTORY = (Join-Path (Get-Location) 'edu.gatech.mbsec.adapter.simulink/target/matlab-it-models')
+$env:MATLAB_SCRIPTS_DIRECTORY = (Join-Path (Get-Location) 'edu.gatech.mbsec.adapter.simulink/matlab')
+$env:PATH = 'C:\Program Files\MATLAB\R2026a\bin;' + $env:PATH
+mvn -f edu.gatech.mbsec.adapter.simulink/pom.xml -Pmatlab-integration `
+  '-Dit.test=MatlabSimulinkIT' `
+  '-Dmatlab.executable=C:/Program Files/MATLAB/R2026a/bin/matlab.exe' verify
+```
+
 ## Runtime configuration
 
 The WAR packages non-secret standalone defaults in
