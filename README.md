@@ -37,8 +37,7 @@ checks that the running adapter can serve a model converted by MATLAB. It requir
 licensed MATLAB/Simulink environment; the normal build and HTTP acceptance profile remain standalone.
 
 Verified locally on 2026-09-23 with MATLAB R2026a Update 5 (26.1.0.3346908) and Simulink 26.1.
-The Simulink license check passed and the Simulink library loaded successfully. All three live
-integration tests passed against the MATLAB-backed adapter.
+All three live integration tests passed against the MATLAB-backed adapter.
 
 On Windows PowerShell, run the live tests with the MATLAB installation on `PATH` and the MATLAB
 backend pointed at the staged model fixtures (so generated XMI stays under `target`):
